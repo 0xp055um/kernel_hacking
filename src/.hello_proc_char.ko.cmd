@@ -1,1 +1,0 @@
-cmd_/kernel/src/hello_proc_char.ko := ld -r -m elf_x86_64  -z max-page-size=0x200000  --build-id  -T ./scripts/module-common.lds -o /kernel/src/hello_proc_char.ko /kernel/src/hello_proc_char.o /kernel/src/hello_proc_char.mod.o;  true
