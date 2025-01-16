@@ -3,9 +3,9 @@
 export KERNEL_VERSION=5.4
 export BUSYBOX_VERSION=1.32.0
 
-#
-# dependencies
-#
+##
+## dependencies
+##
 # echo "[+] Checking / installing dependencies..."
 # sudo apt-get -q update
 # sudo apt-get -q install -y bc bison flex libelf-dev cpio build-essential libssl-dev qemu-system-x86
@@ -69,16 +69,16 @@ sed -i 's/# CONFIG_STATIC is not set/CONFIG_STATIC=y/g' busybox-$BUSYBOX_VERSION
 make -C busybox-$BUSYBOX_VERSION -j$(nproc)
 make -C busybox-$BUSYBOX_VERSION install
 
-# #
-# # filesystem
-# #
 #
-# echo "[+] Building filesystem..."
-# cd fs
-# mkdir -p bin sbin etc proc sys usr/bin usr/sbin root home/ctf
-# cd ..
-cp -a busybox-$BUSYBOX_VERSION/_install/* /fs
+# filesystem
 #
+
+echo "[+] Building filesystem..."
+cd fs
+mkdir -p bin sbin etc proc sys usr/bin usr/sbin root home/ctf
+cd ..
+cp -a busybox-$BUSYBOX_VERSION/_install/* fs
+
 # #
 # # modules
 # #

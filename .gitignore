@@ -6,10 +6,11 @@
 /src/Module.symvers
 /src/modules.order
 /src/.tmp_versions
+
 /linux-*
 /busybox-*
 /initramfs.cpio.gz
-/bzImage
+
 /.gitignore
 /fs/*.ko
 /fs/linuxrc

@@ -1,5 +1,5 @@
-# docker build -t kernel-devel .
-# docker run --rm -it -v "$PWD:/kernel" --name kernel-devel kernel-devel
+# docker build -t kernel-dev .
+# docker run --rm -it -v "$PWD:/kernel" --name kernel-dev kernel-dev
 # docker commit kernel-devel kernel-dev
 
 # Use an Ubuntu base image
@@ -17,19 +17,9 @@ RUN apt-get update -q && apt-get install -yq \
     cpio \
     build-essential \
     libssl-dev \
-    wget \
-    && rm -rf /var/lib/apt/lists/*
+    qemu-system-x86 \
+    wget
 
-# Copy the build script
-COPY build2.sh /build.sh
-RUN chmod +x /build.sh
-
-# Create the fs directory
-RUN mkdir /fs
-WORKDIR /fs
-RUN mkdir -p bin sbin etc proc sys usr/bin usr/sbin root home/ctf
-
-WORKDIR /
-
-# Run the build script
-RUN /build.sh
+# Set the working directory
+RUN mkdir /kernel
+WORKDIR /kernel
