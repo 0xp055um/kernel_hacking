@@ -1,0 +1,1 @@
+cmd_/kernel/src/hello_log.ko := ld -r -m elf_x86_64  -z max-page-size=0x200000  --build-id  -T ./scripts/module-common.lds -o /kernel/src/hello_log.ko /kernel/src/hello_log.o /kernel/src/hello_log.mod.o;  true
