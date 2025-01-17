@@ -2,7 +2,7 @@
   {
     "arguments": [
       "/usr/bin/gcc",
-      "-Wp,-MD,/home/lilith/github/kernel_hacking/src/hello_char/.hello2.o.d",
+      "-Wp,-MD,/home/lilith/github/kernel_hacking/src/hello_char/.hello.o.d",
       "-nostdinc",
       "-isystem",
       "/usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include",
@@ -90,15 +90,15 @@
       "-fcf-protection=none",
       "-Wno-packed-not-aligned",
       "-DMODULE",
-      "-DKBUILD_BASENAME=\"hello2\"",
-      "-DKBUILD_MODNAME=\"hello2\"",
+      "-DKBUILD_BASENAME=\"hello\"",
+      "-DKBUILD_MODNAME=\"hello\"",
       "-c",
       "-o",
-      "/home/lilith/github/kernel_hacking/src/hello_char/hello2.o",
-      "/home/lilith/github/kernel_hacking/src/hello_char/hello2.c"
+      "/home/lilith/github/kernel_hacking/src/hello_char/hello.o",
+      "/home/lilith/github/kernel_hacking/src/hello_char/hello.c"
     ],
     "directory": "/home/lilith/github/kernel_hacking/linux-5.4",
-    "file": "/home/lilith/github/kernel_hacking/src/hello_char/hello2.c",
-    "output": "/home/lilith/github/kernel_hacking/src/hello_char/hello2.o"
+    "file": "/home/lilith/github/kernel_hacking/src/hello_char/hello.c",
+    "output": "/home/lilith/github/kernel_hacking/src/hello_char/hello.o"
   }
 ]

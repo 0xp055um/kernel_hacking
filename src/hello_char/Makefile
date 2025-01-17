@@ -1,4 +1,4 @@
-obj-m = hello2.o
+obj-m = hello.o
 KERNEL_VERSION=5.4
 
 all:

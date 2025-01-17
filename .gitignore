@@ -6,6 +6,7 @@
 /src/*/Module.symvers
 /src/*/modules.order
 /src/*/.tmp_versions
+/src/*/compile_commands.json
 
 /linux-*
 /busybox-*
