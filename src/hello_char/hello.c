@@ -11,6 +11,11 @@ int minor = 0;
 int dev_nr = 1;   // The number of devices we want
 int msg_len = 32; // The Size of the message buffer in the kernel
 
+module_param(dev_nr, int, S_IRUGO);
+module_param(msg_len, int, S_IRUGO);
+module_param(major, int, S_IRUGO);
+module_param(minor, int, S_IRUGO);
+
 struct my_device_data {
   char *message;
   struct cdev cdev;
@@ -81,15 +86,21 @@ int __init hello_init(void) {
   dev_t devno = 0;
 
   printk(KERN_INFO "Hello World\n");
-  result = alloc_chrdev_region(&devno, 0, dev_nr, "hello_char");
 
-  if (result) {
-    printk(KERN_INFO "Failed to get Major number\n");
-    return result;
+  // If the caller provides their own Major and Minor numbers
+  if (major) {
+    devno = MKDEV(major, minor);
+    result = register_chrdev_region(devno, dev_nr, "hello_char");
+  } else {
+    result = alloc_chrdev_region(&devno, 0, dev_nr, "hello_char");
+    major = MAJOR(devno);
+    minor = MINOR(devno);
   }
 
-  major = MAJOR(devno);
-  minor = MINOR(devno);
+  if (result < 0) {
+    printk(KERN_INFO "Failed to get Major number: %d\n", major);
+    return result;
+  }
 
   printk(KERN_INFO "Got Major number: %d and Minor number: %d\n", major, minor);
 
@@ -103,11 +114,13 @@ int __init hello_init(void) {
 
   // Initializing the devices
   for (i = 0; i < dev_nr; i++) {
+    devno = MKDEV(major, minor + i);
     cdev_init(&devices[i].cdev, &hello_fops);
     if (cdev_add(&devices[i].cdev, devno, 1))
       printk(KERN_INFO "Failed to add driver %d\n", i);
-    printk(KERN_INFO "Create device with: 'mknod /dev/hello_char c %d %d'.\n",
-           major, minor + i);
+    printk(KERN_INFO
+           "Create device with: 'mknod /dev/hello_char_%d c %d %d'.\n",
+           i, major, minor + i);
 
     // Allocating space for the Message Buffer that the struct will hold that
     // can store the messages from and to the User
@@ -129,6 +142,7 @@ void __exit hello_exit(void) {
 
   for (i = 0; i < dev_nr; i++) {
     cdev_del(&devices[i].cdev);
+    kfree(devices[i].message);
   }
   kfree(devices);
   unregister_chrdev_region(devno, dev_nr);
