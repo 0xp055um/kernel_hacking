@@ -21,4 +21,5 @@ EOF
 chmod 600 /flag
 chown 0.0 /flag
 /bin/sh
+# cd /home/ctf
 #exec su -l ctf

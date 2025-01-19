@@ -6,9 +6,15 @@
 #define LEN 32
 #define DEV "/dev/hello_char"
 
-int main() {
+int main(int argc, char **argv) {
   char buf[LEN] = {0};
-  int fd = open(DEV, O_RDWR);
+
+  if (argc != 2) {
+    printf("Use: %s \"/dev/hello_char\"\n", argv[0]);
+    return -1;
+  }
+
+  int fd = open(argv[1], O_RDWR);
   if (fd < 0) {
     perror("Failed to open file");
     return -1;
