@@ -3,6 +3,7 @@
 /src/*/*.ko
 /src/*/*.cmd
 /src/*/*.mod
+/src/*/*.out
 /src/*/Module.symvers
 /src/*/modules.order
 /src/*/.tmp_versions

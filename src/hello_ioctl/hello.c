@@ -1,6 +1,6 @@
-#include "linux/printk.h"
 #include <linux/cdev.h>
 #include <linux/fs.h>
+#include <linux/ioctl.h>
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/proc_fs.h>
@@ -15,6 +15,12 @@ int dev_nr = 1;   // The number of devices we want
 int msg_len = 32; // The Size of the message buffer in the kernel
 const char *proc_name = "hello_proc";
 
+// IOCTL macros
+#define IOC_MAGIC 'j'
+#define IOC_MAXNR 2
+#define IOC_GET _IO(IOC_MAGIC, 1)
+#define IOC_SET _IO(IOC_MAGIC, 2)
+
 module_param(dev_nr, int, S_IRUGO);
 module_param(msg_len, int, S_IRUGO);
 module_param(major, int, S_IRUGO);
@@ -28,8 +34,32 @@ struct my_device_data {
 struct my_device_data *devices;
 
 MODULE_LICENSE("Dual BSD/GPL");
-MODULE_DESCRIPTION("A continuation of the Hello World Character Module that "
-                   "creates a procfs entry");
+MODULE_DESCRIPTION("A continuation of the Hello Procfs Module that uses ioctl");
+
+char auth[32];
+long hello_ioctl(struct file *filp, unsigned int cmd, unsigned long arg) {
+  long retval;
+  struct my_device_data *dev = (struct my_device_data *)filp->private_data;
+
+  if (_IOC_TYPE(cmd) != IOC_MAGIC)
+    return -ENOTTY;
+  if (_IOC_NR(cmd) > IOC_MAXNR)
+    return -ENOTTY;
+
+  switch (cmd) {
+  case IOC_GET:
+    if (strcmp(auth, "PASSWORD")) {
+      retval = copy_to_user((char *)arg, dev->message, 32);
+    }
+    break;
+  case IOC_SET:
+    retval = copy_from_user(dev->message, (char *)arg, 32);
+    break;
+  default:
+    break;
+  }
+  return 0;
+}
 
 #ifdef HELLO_DEBUG
 
@@ -134,6 +164,7 @@ static struct file_operations hello_fops = {.owner = THIS_MODULE,
                                             .read = hello_read,
                                             .write = hello_write,
                                             .open = hello_open,
+                                            .unlocked_ioctl = hello_ioctl,
                                             .release = hello_release};
 
 int __init hello_init(void) {
@@ -176,9 +207,9 @@ int __init hello_init(void) {
     printk(KERN_INFO
            "Create device with: 'mknod /dev/hello_char_%d c %d %d'.\n",
            i, major, minor + i);
-
-    // Allocating space for the Message Buffer that the struct will hold that
-    // can store the messages from and to the User
+    /**/
+    /*Allocating space for the Message Buffer that the struct will hold that*/
+    /*can store the messages from and to the User*/
     devices[i].message = kmalloc(msg_len, GFP_KERNEL);
     memset(devices[i].message, 0, msg_len);
 
