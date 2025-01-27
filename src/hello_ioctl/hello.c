@@ -13,7 +13,7 @@ int major = 0;
 int minor = 0;
 int dev_nr = 1; // The number of devices we want
 int msg_len = 32; // The Size of the message buffer in the kernel
-	const char *proc_name = "hello_proc";
+const char *proc_name = "hello_proc";
 
 // IOCTL macros
 #define IOC_MAGIC 'j'
@@ -208,7 +208,8 @@ int __init hello_init(void)
 	       minor);
 
 	// Allocating the space for the struct based on the number of devices
-	devices = kmalloc(sizeof(struct my_device_data) * dev_nr, GFP_KERNEL);
+	devices = kmalloc_array(dev_nr, sizeof(struct my_device_data),
+				GFP_KERNEL);
 	if (!devices) {
 		result = -ENOMEM;
 		return result;
