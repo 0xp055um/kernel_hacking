@@ -110,7 +110,8 @@ int __init hello_init(void)
 	       minor);
 
 	// Allocating the space for the struct based on the number of devices
-	devices = kmalloc_array(dev_nr,sizeof(struct my_device_data), GFP_KERNEL);
+	devices = kmalloc_array(dev_nr, sizeof(struct my_device_data),
+				GFP_KERNEL);
 	if (!devices) {
 		result = -ENOMEM;
 		return result;
