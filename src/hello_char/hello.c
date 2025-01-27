@@ -63,9 +63,8 @@ static ssize_t hello_write(struct file *filp, const char __user *buff,
 	struct my_device_data *dev = filp->private_data;
 	printk(KERN_INFO "Hello from the write callback\n");
 
-	if (count > msg_len) {
+	if (count > msg_len)
 		count = msg_len;
-	}
 
 	memset(dev->message, 0, msg_len);
 
@@ -111,7 +110,7 @@ int __init hello_init(void)
 	       minor);
 
 	// Allocating the space for the struct based on the number of devices
-	devices = kmalloc(sizeof(struct my_device_data) * dev_nr, GFP_KERNEL);
+	devices = kmalloc_array(dev_nr,sizeof(struct my_device_data), GFP_KERNEL);
 	if (!devices) {
 		result = -ENOMEM;
 		return result;
