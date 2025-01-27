@@ -28,7 +28,8 @@ struct my_device_data *devices;
 
 MODULE_LICENSE("Dual BSD/GPL");
 MODULE_DESCRIPTION(
-	"A continuation of the Hello World Character Module that creates a procfs entry");
+	"A continuation of the Hello World Character Module that creates a procfs entry"
+	);
 
 #ifdef HELLO_DEBUG
 
