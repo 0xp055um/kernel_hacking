@@ -1,4 +1,3 @@
-#include "linux/printk.h"
 #include <linux/cdev.h>
 #include <linux/fs.h>
 #include <linux/kernel.h>
@@ -28,8 +27,8 @@ struct my_device_data {
 struct my_device_data *devices;
 
 MODULE_LICENSE("Dual BSD/GPL");
-MODULE_DESCRIPTION("A continuation of the Hello World Character Module that "
-		   "creates a procfs entry");
+MODULE_DESCRIPTION(
+	"A continuation of the Hello World Character Module that creates a procfs entry");
 
 #ifdef HELLO_DEBUG
 
@@ -175,7 +174,8 @@ int __init hello_init(void)
 	       minor);
 
 	// Allocating the space for the struct based on the number of devices
-	devices = kmalloc(sizeof(struct my_device_data) * dev_nr, GFP_KERNEL);
+	devices = kmalloc_array(dev_nr, sizeof(struct my_device_data),
+				GFP_KERNEL);
 	if (!devices) {
 		result = -ENOMEM;
 		return result;
