@@ -37,6 +37,16 @@ MODULE_LICENSE("Dual BSD/GPL");
 MODULE_DESCRIPTION("A continuation of the Hello Procfs Module that uses ioctl");
 
 char auth[32];
+/*
+ * hello_ioctl - Ioctl implementation that checks if the auth buffer.
+ * @filp: File struct pointer.
+ * @cmd: The user provided command.
+ * @arg: The arguments for the user command.
+ *
+ * This ioctl function is a bit silly. It uses the global "auth" buff.
+ *
+ * Return: 0 on Success of Error.
+ */
 long hello_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 {
 	long retval;
@@ -182,9 +192,45 @@ static struct file_operations hello_fops = { .owner = THIS_MODULE,
 					     .unlocked_ioctl = hello_ioctl,
 					     .release = hello_release };
 
+/*
+ * Prototype for the exit fuction
+ */
+void hello_exit(void);
+
+static int setup_cdev(void)
+{
+	int i, result;
+	dev_t devno;
+
+	// Initializing the devices
+	for (i = 0; i < dev_nr; i++) {
+		devno = MKDEV(major, minor + i);
+		cdev_init(&devices[i].cdev, &hello_fops);
+		if (cdev_add(&devices[i].cdev, devno, 1))
+			printk(KERN_INFO "Failed to add driver %d\n", i);
+
+		printk(KERN_INFO
+		       "Create device with: 'mknod /dev/hello_char_%d c %d %d'.\n",
+		       i, major, minor + i);
+		/*
+		 * Allocating space for the Message Buffer that the struct will hold that
+		 * can store the messages from and to the User
+		 */
+		devices[i].message = kzalloc(msg_len, GFP_KERNEL);
+		if (!devices[i].message) {
+			result = -ENOMEM;
+			return result;
+		}
+
+		// Initialize the message buffer
+		strcpy(devices[i].message, "Hello World!\n");
+	}
+	return 0;
+}
+
 int __init hello_init(void)
 {
-	int result, i;
+	int result;
 	dev_t devno = 0;
 
 	printk(KERN_INFO "Hello World\n");
@@ -208,40 +254,27 @@ int __init hello_init(void)
 	       minor);
 
 	// Allocating the space for the struct based on the number of devices
-	devices = kmalloc_array(dev_nr, sizeof(struct my_device_data),
-				GFP_KERNEL);
+	devices = kmalloc_array(dev_nr, sizeof(*devices), GFP_KERNEL);
 	if (!devices) {
 		result = -ENOMEM;
-		return result;
+		goto fail;
 	}
-	memset(devices, 0, sizeof(struct my_device_data));
+	memset(devices, 0, dev_nr * sizeof(*devices));
 
-	// Initializing the devices
-	for (i = 0; i < dev_nr; i++) {
-		devno = MKDEV(major, minor + i);
-		cdev_init(&devices[i].cdev, &hello_fops);
-		if (cdev_add(&devices[i].cdev, devno, 1))
-			printk(KERN_INFO "Failed to add driver %d\n", i);
-		printk(KERN_INFO
-		       "Create device with: 'mknod /dev/hello_char_%d c %d %d'.\n",
-		       i, major, minor + i);
-		/**/
-		/*Allocating space for the Message Buffer that the struct will hold that*/
-		/*can store the messages from and to the User*/
-		devices[i].message = kmalloc(msg_len, GFP_KERNEL);
-		memset(devices[i].message, 0, msg_len);
+	result = setup_cdev();
+	if (result)
+		goto fail;
 
-		// Initialize the message buffer
-		strcpy(devices[i].message, "Hello World!\n");
-	}
 #ifdef HELLO_DEBUG
 	hello_proc_create();
 #endif
-
 	return 0;
+fail:
+	hello_exit();
+	return result;
 }
 
-void __exit hello_exit(void)
+void hello_exit(void)
 {
 	int i;
 	dev_t devno = MKDEV(major, minor);
