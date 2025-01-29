@@ -192,10 +192,25 @@ static struct file_operations hello_fops = { .owner = THIS_MODULE,
 					     .unlocked_ioctl = hello_ioctl,
 					     .release = hello_release };
 
-/*
- * Prototype for the exit fuction
- */
-void hello_exit(void);
+void hello_exit(void)
+{
+	int i;
+	dev_t devno = MKDEV(major, minor);
+
+	printk(KERN_INFO "Goodbye World\n");
+
+	for (i = 0; i < dev_nr; i++) {
+		cdev_del(&devices[i].cdev);
+		kfree(devices[i].message);
+	}
+	kfree(devices);
+
+#ifdef HELLO_DEBUG
+	hello_proc_remove();
+#endif
+
+	unregister_chrdev_region(devno, dev_nr);
+}
 
 static int setup_cdev(void)
 {
@@ -213,8 +228,8 @@ static int setup_cdev(void)
 		       "Create device with: 'mknod /dev/hello_char_%d c %d %d'.\n",
 		       i, major, minor + i);
 		/*
-		 * Allocating space for the Message Buffer that the struct will hold that
-		 * can store the messages from and to the User
+		 * Allocating space for the Message Buffer that the struct will hold
+		 * that can store the messages from and to the User
 		 */
 		devices[i].message = kzalloc(msg_len, GFP_KERNEL);
 		if (!devices[i].message) {
@@ -274,25 +289,6 @@ fail:
 	return result;
 }
 
-void hello_exit(void)
-{
-	int i;
-	dev_t devno = MKDEV(major, minor);
-
-	printk(KERN_INFO "Goodbye World\n");
-
-	for (i = 0; i < dev_nr; i++) {
-		cdev_del(&devices[i].cdev);
-		kfree(devices[i].message);
-	}
-	kfree(devices);
-
-#ifdef HELLO_DEBUG
-	hello_proc_remove();
-#endif
-
-	unregister_chrdev_region(devno, dev_nr);
-}
 
 module_init(hello_init);
 module_exit(hello_exit);
